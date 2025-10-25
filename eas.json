@@ -1,16 +1,17 @@
 {
-  "cli": { "version": ">= 3.0.0" },
+  "cli": {
+    "version": ">= 3.0.0",
+    "appVersionSource": "app.json"
+  },
   "build": {
     "preview": {
       "android": { "buildType": "apk" },
       "node": "18.20.3",
-      "cache": { "disabled": true },
-      "appVersionSource": "app.json"
+      "cache": { "disabled": true }
     },
     "production": {
       "android": { "buildType": "app-bundle" },
-      "node": "18.20.3",
-      "appVersionSource": "app.json"
+      "node": "18.20.3"
     }
   }
 }
