@@ -1,21 +1,16 @@
 {
-  "cli": {
-    "version": ">= 16.24.1",
-    "appVersionSource": "remote"
-  },
+  "cli": { "version": ">= 3.0.0" },
   "build": {
-    "development": {
-      "developmentClient": true,
-      "distribution": "internal"
-    },
     "preview": {
-      "distribution": "internal"
+      "android": { "buildType": "apk" },
+      "node": "18.20.3",
+      "cache": { "disabled": true },
+      "appVersionSource": "app.json"
     },
     "production": {
-      "autoIncrement": true
+      "android": { "buildType": "app-bundle" },
+      "node": "18.20.3",
+      "appVersionSource": "app.json"
     }
-  },
-  "submit": {
-    "production": {}
   }
 }

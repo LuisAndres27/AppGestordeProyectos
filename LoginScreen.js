@@ -1,4 +1,3 @@
-// LoginScreen.js
 import React, { useState, useCallback, memo } from 'react';
 import {
   View, Text, TextInput, TouchableOpacity, StyleSheet, Alert,
@@ -26,7 +25,6 @@ const InputField = memo(({
         secureTextEntry={secureTextEntry && !showPassword}
         keyboardType={keyboardType}
         autoCapitalize="none"
-        blurOnSubmit={false}
       />
       {secureTextEntry && (
         <TouchableOpacity style={styles.eyeIcon} onPress={onTogglePassword}>
@@ -55,9 +53,8 @@ export default function LoginScreen({ navigation }) {
     try {
       setLoading(true);
       await login(email.trim(), password);
-      navigation.replace('Proyectos'); // va directo a la lista
+      navigation.replace('Proyectos');
     } catch (err) {
-      console.log(err);
       Alert.alert('Error', 'Credenciales inválidas o servidor no disponible');
     } finally {
       setLoading(false);
@@ -68,11 +65,10 @@ export default function LoginScreen({ navigation }) {
     <KeyboardAvoidingView style={styles.container}
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
       <StatusBar barStyle="dark-content" backgroundColor="#f5f7fa" />
-      <ScrollView contentContainerStyle={styles.scrollContainer} keyboardShouldPersistTaps="handled">
+      <ScrollView contentContainerStyle={styles.scrollContainer}>
         <View style={styles.header}><Text style={styles.logo}>GestiónPro</Text></View>
         <View style={styles.formContainer}>
           <Text style={styles.title}>Iniciar Sesión</Text>
-
           <InputField
             label="Correo Electrónico"
             value={loginData.email}
@@ -93,12 +89,10 @@ export default function LoginScreen({ navigation }) {
             icon="lock-closed-outline"
             required
           />
-
           <TouchableOpacity
             style={[styles.actionButton, styles.primaryButton, loading && { opacity: 0.7 }]}
             onPress={handleLogin}
-            disabled={loading}
-          >
+            disabled={loading}>
             <Text style={styles.actionButtonText}>{loading ? 'Ingresando...' : 'Entrar'}</Text>
           </TouchableOpacity>
         </View>
@@ -107,7 +101,6 @@ export default function LoginScreen({ navigation }) {
   );
 }
 
-// helpers + estilos (mantengo tu estética)
 const getIconName = (iconType) => {
   const icons = {
     'text': 'text-outline',
@@ -123,16 +116,16 @@ const getIconName = (iconType) => {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#f5f7fa' },
-  scrollContainer: { flexGrow: 1, justifyContent: 'center', paddingHorizontal: 20, paddingVertical: 20 },
+  scrollContainer: { flexGrow: 1, justifyContent: 'center', paddingHorizontal: 20 },
   header: { alignItems: 'center', marginBottom: 30 },
-  logo: { fontSize: 32, fontWeight: 'bold' },
+  logo: { fontSize: 32, fontWeight: 'bold', color: '#4361ee' },
   formContainer: { backgroundColor: 'white', borderRadius: 12, padding: 24, elevation: 6 },
-  title: { fontSize: 22, fontWeight: 'bold', marginBottom: 24, textAlign: 'center' },
+  title: { fontSize: 22, fontWeight: 'bold', color: '#4361ee', marginBottom: 24, textAlign: 'center' },
   inputGroup: { marginBottom: 18 },
   label: { fontSize: 15, fontWeight: '600', marginBottom: 8 },
   required: { color: '#f72585' },
   inputContainer: { flexDirection: 'row', alignItems: 'center', borderWidth: 1.5, borderRadius: 10, paddingHorizontal: 12 },
-  inputIcon: { marginRight: 12 },
+  inputIcon: { marginRight: 12, color: '#4361ee' },
   input: { flex: 1, paddingVertical: 14, fontSize: 15 },
   eyeIcon: { padding: 6 },
   actionButton: { borderRadius: 10, paddingVertical: 16, alignItems: 'center', marginTop: 8 },

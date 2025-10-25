@@ -1,68 +1,134 @@
-// ProjectsScreen.js
-import React, { useEffect, useState } from 'react';
-import { View, Text, FlatList, ActivityIndicator, StyleSheet, RefreshControl } from 'react-native';
-import { getProjects } from './lib/gestionesAPI';
+import React, { useState, useCallback, memo } from 'react';
+import {
+  View, Text, TextInput, TouchableOpacity, StyleSheet, Alert,
+  KeyboardAvoidingView, Platform, ScrollView, StatusBar
+} from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
+import { login } from './lib/gestionesAPI';
 
-export default function ProjectsScreen() {
-  const [projects, setProjects] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [refreshing, setRefreshing] = useState(false);
+const InputField = memo(({
+  label, value, onChangeText, placeholder, secureTextEntry = false,
+  showPassword = false, onTogglePassword, required = false,
+  icon = "text", keyboardType = "default"
+}) => (
+  <View style={styles.inputGroup}>
+    <Text style={styles.label}>
+      {label} {required && <Text style={styles.required}>*</Text>}
+    </Text>
+    <View style={styles.inputContainer}>
+      <Ionicons name={getIconName(icon)} size={20} style={styles.inputIcon} />
+      <TextInput
+        style={styles.input}
+        placeholder={placeholder}
+        value={value}
+        onChangeText={onChangeText}
+        secureTextEntry={secureTextEntry && !showPassword}
+        keyboardType={keyboardType}
+        autoCapitalize="none"
+      />
+      {secureTextEntry && (
+        <TouchableOpacity style={styles.eyeIcon} onPress={onTogglePassword}>
+          <Ionicons name={showPassword ? "eye-off-outline" : "eye-outline"} size={20} />
+        </TouchableOpacity>
+      )}
+    </View>
+  </View>
+));
 
-  const load = async () => {
+export default function LoginScreen({ navigation }) {
+  const [loginData, setLoginData] = useState({ email: '', password: '' });
+  const [showLoginPassword, setShowLoginPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
+
+  const handleLoginChange = useCallback((field, value) => {
+    setLoginData(prev => ({ ...prev, [field]: value }));
+  }, []);
+
+  const handleLogin = async () => {
+    const { email, password } = loginData;
+    if (!email || !password) {
+      Alert.alert('Campos requeridos', 'Ingresa correo y contraseña');
+      return;
+    }
     try {
       setLoading(true);
-      const data = await getProjects();
-      // La API podría devolver {data: [...]} o directamente [...]
-      const list = Array.isArray(data) ? data : (data?.data || data?.projects || []);
-      setProjects(list);
-    } catch (e) {
-      console.log(e);
+      await login(email.trim(), password);
+      navigation.replace('Proyectos');
+    } catch (err) {
+      Alert.alert('Error', 'Credenciales inválidas o servidor no disponible');
     } finally {
       setLoading(false);
     }
   };
 
-  const onRefresh = async () => {
-    setRefreshing(true);
-    await load();
-    setRefreshing(false);
-  };
-
-  useEffect(() => { load(); }, []);
-
-  if (loading) {
-    return (
-      <View style={styles.center}>
-        <ActivityIndicator size="large" />
-        <Text style={{ marginTop: 10 }}>Cargando proyectos…</Text>
-      </View>
-    );
-  }
-
   return (
-    <FlatList
-      data={projects}
-      keyExtractor={(item, idx) => String(item?.id ?? idx)}
-      refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
-      contentContainerStyle={{ padding: 16 }}
-      renderItem={({ item }) => (
-        <View style={styles.card}>
-          <Text style={styles.title}>{item?.nombre ?? 'Proyecto'}</Text>
-          {item?.descripcion ? <Text style={styles.desc}>{item.descripcion}</Text> : null}
-          <Text style={styles.meta}>
-            {`Tipo: ${item?.tipo ?? '-'} · Estado: ${item?.estado ?? '-'}`}
-          </Text>
+    <KeyboardAvoidingView style={styles.container}
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
+      <StatusBar barStyle="dark-content" backgroundColor="#f5f7fa" />
+      <ScrollView contentContainerStyle={styles.scrollContainer}>
+        <View style={styles.header}><Text style={styles.logo}>GestiónPro</Text></View>
+        <View style={styles.formContainer}>
+          <Text style={styles.title}>Iniciar Sesión</Text>
+          <InputField
+            label="Correo Electrónico"
+            value={loginData.email}
+            onChangeText={(v) => handleLoginChange('email', v)}
+            placeholder="tu@email.com"
+            icon="mail-outline"
+            keyboardType="email-address"
+            required
+          />
+          <InputField
+            label="Contraseña"
+            value={loginData.password}
+            onChangeText={(v) => handleLoginChange('password', v)}
+            placeholder="Tu contraseña"
+            secureTextEntry
+            showPassword={showLoginPassword}
+            onTogglePassword={() => setShowLoginPassword(!showLoginPassword)}
+            icon="lock-closed-outline"
+            required
+          />
+          <TouchableOpacity
+            style={[styles.actionButton, styles.primaryButton, loading && { opacity: 0.7 }]}
+            onPress={handleLogin}
+            disabled={loading}>
+            <Text style={styles.actionButtonText}>{loading ? 'Ingresando...' : 'Entrar'}</Text>
+          </TouchableOpacity>
         </View>
-      )}
-      ListEmptyComponent={<Text style={{ textAlign: 'center', marginTop: 40 }}>Sin proyectos</Text>}
-    />
+      </ScrollView>
+    </KeyboardAvoidingView>
   );
 }
 
+const getIconName = (iconType) => {
+  const icons = {
+    'text': 'text-outline',
+    'mail': 'mail-outline',
+    'mail-outline': 'mail-outline',
+    'lock': 'lock-closed-outline',
+    'lock-closed-outline': 'lock-closed-outline',
+    'person': 'person-outline',
+    'person-outline': 'person-outline'
+  };
+  return icons[iconType] || 'text-outline';
+};
+
 const styles = StyleSheet.create({
-  center: { flex: 1, alignItems: 'center', justifyContent: 'center' },
-  card: { backgroundColor: '#fff', borderRadius: 12, padding: 16, marginBottom: 12, elevation: 3 },
-  title: { fontSize: 16, fontWeight: '700', marginBottom: 6 },
-  desc: { color: '#444', marginBottom: 6 },
-  meta: { color: '#666' },
+  container: { flex: 1, backgroundColor: '#f5f7fa' },
+  scrollContainer: { flexGrow: 1, justifyContent: 'center', paddingHorizontal: 20 },
+  header: { alignItems: 'center', marginBottom: 30 },
+  logo: { fontSize: 32, fontWeight: 'bold', color: '#4361ee' },
+  formContainer: { backgroundColor: 'white', borderRadius: 12, padding: 24, elevation: 6 },
+  title: { fontSize: 22, fontWeight: 'bold', color: '#4361ee', marginBottom: 24, textAlign: 'center' },
+  inputGroup: { marginBottom: 18 },
+  label: { fontSize: 15, fontWeight: '600', marginBottom: 8 },
+  required: { color: '#f72585' },
+  inputContainer: { flexDirection: 'row', alignItems: 'center', borderWidth: 1.5, borderRadius: 10, paddingHorizontal: 12 },
+  inputIcon: { marginRight: 12, color: '#4361ee' },
+  input: { flex: 1, paddingVertical: 14, fontSize: 15 },
+  eyeIcon: { padding: 6 },
+  actionButton: { borderRadius: 10, paddingVertical: 16, alignItems: 'center', marginTop: 8 },
+  primaryButton: { backgroundColor: '#4361ee' },
+  actionButtonText: { color: 'white', fontSize: 16, fontWeight: '600' },
 });
