@@ -6,27 +6,31 @@
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
-
-    "newArchEnabled": false,          
-
+    "newArchEnabled": true,
     "splash": {
       "image": "./assets/splash-icon.png",
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
-    "ios": { "supportsTablet": true },
+    "ios": {
+      "supportsTablet": true
+    },
     "android": {
       "package": "com.luismoreno27.cursodesarrolo",
       "versionCode": 1,
       "edgeToEdgeEnabled": true,
-      "permissions": [],              
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       }
     },
-    "web": { "favicon": "./assets/favicon.png" },
-    "extra": { "eas": { "projectId": "5c1d59f6-b831-44ac-8ead-281ca560aa4c" } }
+    "web": {
+      "favicon": "./assets/favicon.png"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "5c1d59f6-b831-44ac-8ead-281ca560aa4c"
+      }
+    }
   }
 }
-
